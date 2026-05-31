@@ -85,6 +85,8 @@ services:
       - ../MSPR-backend-kcal:/app
     environment:
       - ENV=development
+      - KCAL_SECRET_TOKEN=${KCAL_SECRET_TOKEN}
+      - HF_TOKEN=${HF_TOKEN}
     depends_on:
       - db
 
