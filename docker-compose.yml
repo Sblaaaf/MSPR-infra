@@ -171,6 +171,7 @@ services:
       - DATA_DIR=/app/data
       - MODELS_DIR=/app/models
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - MEAL_SERVICE_URL=http://meal:8003
     depends_on:
       mongodb:
         condition: service_healthy

@@ -7,16 +7,46 @@ https://satisfying-activity-4ab.notion.site/JARMY-API-329e716da2bc80fe85f0d310e1
 
 ---
 
+## ✅ Prérequis
+
+À installer sur le poste (identique sur Linux / macOS / Windows+WSL2) :
+
+- **Docker Engine ≥ 24** et **Docker Compose v2** (`docker compose version`)
+- **Git** (pour cloner les dépôts — voir `CLONE_ALL.md`)
+- **Python ≥ 3.9** (uniquement pour `make seed` / `seed_demo.py`)
+- **GNU Make** (fournit les commandes uniques ci-dessous ; optionnel mais recommandé)
+
+---
+
 ## 🚀 Démarrage rapide
 
+Avec **Make** (recommandé — commande unique de bout en bout) :
+
 ```bash
-docker-compose up --build
+make demo     # build + démarre toute la stack, attend la DB, injecte les données démo
 ```
 
-Arrêt :
+Sans Make (équivalent manuel) :
+
 ```bash
-docker-compose down
+docker compose up --build -d   # démarre la stack
+python3 seed_demo.py           # (optionnel) données de démo
 ```
+
+### Commandes Make disponibles
+
+| Commande | Effet |
+|---|---|
+| `make demo` | **Déploiement complet en 1 commande** : `up` + DB prête + données démo |
+| `make up` | Build + démarre toute la stack en arrière-plan |
+| `make down` | Arrête la stack (**conserve** les données) |
+| `make ps` / `make logs` | État des services / suivi des logs |
+| `make seed` | Injecte le compte de démo (Camille Martin) |
+| `make backup` / `make restore` | Sauvegarde / restauration (voir section dédiée) |
+| `make reset` | **Remise à zéro** : arrête + supprime tous les volumes (données perdues) |
+| `make clean` | `reset` + purge des images locales et conteneurs orphelins |
+
+`make` (sans argument) affiche l'aide complète.
 
 ---
 
@@ -123,6 +153,59 @@ Authorization: Bearer clesecrete
 - User : `postgres`
 - Password : `postgres`
 - Database : `healthai`
+
+---
+
+## 💾 Sauvegarde & restauration
+
+Deux scripts dans `scripts/` couvrent l'ensemble des données persistantes de la stack.
+
+| Magasin | Contenu | Outil |
+|---|---|---|
+| PostgreSQL (`healthai`) | utilisateurs, repas, aliments, métriques… (auth, meal, kcal, etl, admin) | `pg_dump -Fc` |
+| MongoDB (`recommendation_db`) | recommandations | `mongodump --archive --gzip` |
+| Volume `recommendation_models` | modèles ML entraînés *(régénérables via `train.py`)* | `tar` |
+
+Les dumps sont produits **dans les conteneurs** puis stockés dans un dossier horodaté
+`backups/<AAAAMMJJ_HHMMSS>/` (ce dossier est ignoré par git).
+
+### Sauvegarder
+
+```bash
+docker compose up -d        # la stack doit tourner
+./scripts/backup.sh
+```
+
+Chaque sauvegarde contient `postgres_healthai.dump`, `mongo_recommendation_db.archive.gz`,
+`recommendation_models.tar.gz` et un `MANIFEST.txt`. Par défaut, les **7** sauvegardes les
+plus récentes sont conservées (rotation automatique).
+
+### Restaurer
+
+```bash
+./scripts/restore.sh                      # restaure la sauvegarde la plus récente
+./scripts/restore.sh backups/20260611_094607   # ou un dossier précis
+```
+
+> ⚠️ La restauration **écrase** les données actuelles (Postgres `--clean`, Mongo `--drop`).
+> Une confirmation est demandée ; `FORCE=1 ./scripts/restore.sh …` la contourne (utile en CI/cron).
+> Après restauration des modèles ML : `docker compose restart recommendation`.
+
+### Réglages (variables d'environnement)
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `BACKUP_ROOT` | `./backups` | répertoire des sauvegardes |
+| `BACKUP_KEEP` | `7` | nombre de sauvegardes conservées (rotation) |
+| `PG_SERVICE` / `PG_USER` / `PG_DB` | `db` / `postgres` / `healthai` | cible PostgreSQL |
+| `MONGO_SERVICE` / `MONGO_DB` | `mongodb` / `recommendation_db` | cible MongoDB |
+
+### Automatisation (cron)
+
+```bash
+# Sauvegarde quotidienne à 2 h du matin
+0 2 * * * cd /chemin/vers/MSPR-infra && ./scripts/backup.sh >> backups/backup.log 2>&1
+```
 
 ---
 

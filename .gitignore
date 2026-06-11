@@ -77,3 +77,6 @@ logs/
 # Project specific
 # Ignore any generated models or data if applicable
 # food_ner_model/  # Uncomment if model is generated and large
+
+# Sauvegardes générées par scripts/backup.sh
+backups/
