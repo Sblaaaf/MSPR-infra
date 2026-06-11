@@ -1,0 +1,14 @@
+# Charge automatiquement les dashboards JSON déposés dans /var/lib/grafana/dashboards.
+apiVersion: 1
+
+providers:
+  - name: HealthAI
+    orgId: 1
+    folder: HealthAI
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

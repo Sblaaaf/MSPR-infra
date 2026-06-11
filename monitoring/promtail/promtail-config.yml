@@ -1,0 +1,31 @@
+# Promtail — découvre les conteneurs via le socket Docker et pousse leurs logs
+# vers Loki. Le service discovery Docker évite de dépendre du chemin
+# /var/lib/docker/containers (peu fiable sous Docker Desktop macOS).
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+    relabel_configs:
+      # Nom du conteneur (sans le slash de tête)
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: container
+      # Service docker-compose (ex: gateway, auth, db, grafana...)
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: service
+      # Projet docker-compose
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_project"]
+        target_label: compose_project
+      - target_label: job
+        replacement: docker

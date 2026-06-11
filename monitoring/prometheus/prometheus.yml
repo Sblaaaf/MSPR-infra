@@ -1,0 +1,55 @@
+# Prometheus — collecte les métriques /metrics exposées par chaque microservice
+# (prometheus-fastapi-instrumentator) sur le réseau interne docker-compose.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    project: healthai
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gateway:8000"]
+        labels: { service: gateway }
+
+  - job_name: auth
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["auth:8004"]
+        labels: { service: auth }
+
+  - job_name: meal
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["meal:8003"]
+        labels: { service: meal }
+
+  - job_name: kcal
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["kcal:8001"]
+        labels: { service: kcal }
+
+  - job_name: etl
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["etl:8002"]
+        labels: { service: etl }
+
+  - job_name: recommendation
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["recommendation:8006"]
+        labels: { service: recommendation }
+
+  - job_name: admin
+    # /metrics est déjà utilisé par le CRUD admin (metrique_quotidienne) → endpoint dédié.
+    metrics_path: /internal-metrics
+    static_configs:
+      - targets: ["admin:8005"]
+        labels: { service: admin }

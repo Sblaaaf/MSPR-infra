@@ -59,8 +59,15 @@ python3 seed_demo.py           # (optionnel) données de démo
 | Meal         | http://localhost:8003           | http://localhost:8003/docs   |
 | Auth         | http://localhost:8004           | http://localhost:8004/docs   |
 | Adminer      | http://localhost:8080           | —                            |
+| Grafana      | http://localhost:3001           | dashboard « HealthAI — Supervision » |
+| Prometheus   | http://localhost:9090           | http://localhost:9090/targets |
+| Loki         | http://localhost:3100           | http://localhost:3100/ready  |
 
 > **Note :** La documentation Swagger complète (avec exemples de body, schémas, etc.) est disponible sur chaque service, pas sur le gateway.
+
+> **Supervision :** chaque service expose `/metrics` (Prometheus). Grafana est en
+> accès anonyme lecture seule (édition : `admin`/`admin`) et embarqué dans l'admin du
+> frontend (`/admin/supervision`). Voir `MSPR-Docs/06-monitoring-supervision.md`.
 
 ---
 
@@ -68,6 +75,7 @@ python3 seed_demo.py           # (optionnel) données de démo
 
 - **db** : PostgreSQL partagé (base `healthai`)
 - **adminer** : interface web pour visualiser la base
+- **prometheus / loki / promtail / grafana** : stack de supervision (métriques + logs + dashboards)
 - **etl** : pipeline ETL pour charger les données
 - **gateway** : proxy centralisant les appels API
 - **kcal** : analyse nutritionnelle automatique

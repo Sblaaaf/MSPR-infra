@@ -4,3 +4,4 @@ sqlalchemy
 psycopg2-binary
 pydantic[email]
 python-dotenv>=1.0
+prometheus-fastapi-instrumentator
