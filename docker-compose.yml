@@ -77,6 +77,21 @@ services:
       - etl
       - admin
 
+  frontend:
+    build:
+      context: ../MSPR-frontend
+    command: npm run dev
+    volumes:
+      - ../MSPR-frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - gateway
+
   kcal:
     build: ../MSPR-backend-kcal
     ports:
