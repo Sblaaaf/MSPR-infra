@@ -51,6 +51,7 @@ services:
       - ETL_CRON_HOUR=3
       - ETL_CRON_MINUTE=0
       - ETL_SCHEDULER_ENABLED=true
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
       - KAGGLE_USERNAME=${KAGGLE_USERNAME:-}
       - KAGGLE_KEY=${KAGGLE_KEY:-}
     depends_on:
@@ -70,6 +71,7 @@ services:
       - AUTH_SERVICE_URL=http://auth:8004
       - ETL_SERVICE_URL=http://etl:8002
       - ADMIN_SERVICE_URL=http://admin:8005
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     depends_on:
       - kcal
       - meal
@@ -89,6 +91,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_RECOMMENDATION_API_KEY=${RECOMMENDATION_API_KEY}
     depends_on:
       - gateway
 
@@ -108,6 +111,7 @@ services:
       - VISION_MONTHLY_CAP=${VISION_MONTHLY_CAP:-5000}
       - VISION_MAX_IMAGE_PX=${VISION_MAX_IMAGE_PX:-768}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     depends_on:
       - db
 
@@ -123,6 +127,7 @@ services:
       - DB_NAME=healthai
       - DB_USER=postgres
       - DB_PASSWORD=postgres
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     depends_on:
       - db
 
@@ -138,6 +143,7 @@ services:
       - DB_NAME=healthai
       - DB_USER=postgres
       - DB_PASSWORD=postgres
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     depends_on:
       - db
 
@@ -185,7 +191,7 @@ services:
       - RECOMMENDATION_API_KEY=${RECOMMENDATION_API_KEY}
       - DATA_DIR=/app/data
       - MODELS_DIR=/app/models
-      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
       - MEAL_SERVICE_URL=http://meal:8003
     depends_on:
       mongodb:
