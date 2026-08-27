@@ -1,0 +1,17 @@
+# Alertmanager — reçoit les alertes de Prometheus et les groupe/route.
+#
+# Pas d'intégration Slack/email configurée pour cette démonstration (pas de
+# canal réel à notifier) : les alertes restent visibles et consultables dans
+# l'interface web d'Alertmanager (http://localhost:9093), ce qui suffit à
+# démontrer que le pipeline d'alerte fonctionne de bout en bout. Brancher un
+# webhook_configs / slack_configs / email_configs sur le receiver "default"
+# suffirait à activer de vraies notifications en production.
+route:
+  receiver: default
+  group_by: ["alertname", "service"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 4h
+
+receivers:
+  - name: default

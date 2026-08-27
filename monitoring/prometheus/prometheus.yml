@@ -6,6 +6,14 @@ global:
   external_labels:
     project: healthai
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - alert_rules.yml
+
 scrape_configs:
   - job_name: prometheus
     static_configs:

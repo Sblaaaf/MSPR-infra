@@ -1,0 +1,40 @@
+# Règles d'alerte HealthAI — évaluées par Prometheus, envoyées à Alertmanager.
+# Réutilise les mêmes métriques que le tableau de bord Grafana
+# (monitoring/grafana/dashboards/healthai-overview.json) pour rester cohérent.
+groups:
+  - name: healthai-availability
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"gateway|auth|meal|kcal|etl|recommendation|admin"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.service }} injoignable"
+          description: "Prometheus ne parvient plus à scraper {{ $labels.service }} depuis plus d'1 minute."
+
+  - name: healthai-performance
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum by (service) (rate(http_request_duration_seconds_count{status=~"5..|5xx"}[5m]))
+          /
+          sum by (service) (rate(http_request_duration_seconds_count[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreurs élevé sur {{ $labels.service }}"
+          description: "Plus de 5% des requêtes sur {{ $labels.service }} ont répondu en erreur 5xx sur les 5 dernières minutes."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket[5m])))
+          > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence élevée sur {{ $labels.service }}"
+          description: "Le 95e percentile du temps de réponse de {{ $labels.service }} dépasse 1 seconde depuis plus de 5 minutes."
