@@ -26,6 +26,11 @@ import sys
 from datetime import date, timedelta
 from hashlib import sha256
 
+# Force stdout/stderr en UTF-8 : sur Windows l'encodage par défaut de la console
+# (cp1252) ne supporte pas les caractères accentués/symboles (✓, ✗) utilisés ici.
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
+
 # ---------------------------------------------------------------------------
 # Paramètres du profil
 # ---------------------------------------------------------------------------
@@ -212,7 +217,7 @@ def run_in_db(sql: str) -> int:
         "docker", "compose", "exec", "-T", DB_SERVICE,
         "psql", "-U", DB_USER, "-d", DB_NAME, "-v", "ON_ERROR_STOP=1", "-q",
     ]
-    proc = subprocess.run(cmd, input=sql, text=True, capture_output=True)
+    proc = subprocess.run(cmd, input=sql, text=True, encoding="utf-8", capture_output=True)
     if proc.stdout.strip():
         print(proc.stdout, end="")
     if proc.returncode != 0:
