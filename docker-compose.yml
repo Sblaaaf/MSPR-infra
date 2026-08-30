@@ -92,6 +92,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
       - NEXT_PUBLIC_RECOMMENDATION_API_KEY=${RECOMMENDATION_API_KEY}
+      - NEXT_PUBLIC_KCAL_TOKEN=${KCAL_SECRET_TOKEN}
     depends_on:
       - gateway
 
