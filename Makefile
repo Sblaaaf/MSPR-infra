@@ -6,7 +6,9 @@ COMPOSE := docker compose
 DB_SERVICE := db
 
 .DEFAULT_GOAL := help
-.PHONY: help up build down ps logs wait-db seed demo reset clean backup restore mode-offline mode-online
+.PHONY: help up build down ps logs wait-db seed demo reset clean backup restore mode-offline mode-online mode-performance mode-full
+
+MONITORING_SERVICES := grafana prometheus alertmanager loki promtail
 
 help: ## Affiche cette aide
 	@echo "HealthAI — cibles disponibles :"
@@ -58,6 +60,15 @@ mode-online: ## Restaure la config complète (IA connectée : Claude/HuggingFace
 	@sed -i 's/^VISION_PROVIDER=.*/VISION_PROVIDER=claude/' .env
 	@$(COMPOSE) up -d kcal
 	@echo "✓ Mode complet actif — analyse photo via IA connectée."
+
+mode-performance: ## Ébauche config PERFORMANCE : coupe le monitoring (Grafana/Prometheus/Loki/Promtail/Alertmanager, ~200 Mo)
+	@$(COMPOSE) stop $(MONITORING_SERVICES)
+	@echo "✓ Mode performance actif — monitoring désactivé (~200 Mo de RAM libérés)."
+	@echo "  Les services applicatifs restent inchangés."
+
+mode-full: ## Réactive le monitoring complet (annule mode-performance)
+	@$(COMPOSE) up -d $(MONITORING_SERVICES)
+	@echo "✓ Monitoring complet réactivé."
 
 backup: ## Sauvegarde Postgres + Mongo + modèles (scripts/backup.sh)
 	./scripts/backup.sh
