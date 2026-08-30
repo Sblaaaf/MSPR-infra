@@ -71,6 +71,7 @@ services:
       - AUTH_SERVICE_URL=http://auth:8004
       - ETL_SERVICE_URL=http://etl:8002
       - ADMIN_SERVICE_URL=http://admin:8005
+      - SOCIAL_SERVICE_URL=http://social:8007
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     depends_on:
       - kcal
@@ -78,6 +79,7 @@ services:
       - auth
       - etl
       - admin
+      - social
 
   frontend:
     build:
@@ -164,6 +166,23 @@ services:
       db:
         condition: service_healthy
 
+  social:
+    build: ./services/social
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./services/social:/app
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=healthai
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      db:
+        condition: service_healthy
+
   mongodb:
     image: mongo:7.0
     ports:
@@ -223,6 +242,7 @@ services:
       - etl
       - recommendation
       - admin
+      - social
       - alertmanager
 
   alertmanager:

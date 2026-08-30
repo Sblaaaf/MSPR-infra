@@ -5,7 +5,7 @@ groups:
   - name: healthai-availability
     rules:
       - alert: ServiceDown
-        expr: up{job=~"gateway|auth|meal|kcal|etl|recommendation|admin"} == 0
+        expr: up{job=~"gateway|auth|meal|kcal|etl|recommendation|admin|social"} == 0
         for: 1m
         labels:
           severity: critical
