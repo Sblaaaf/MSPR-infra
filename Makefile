@@ -6,7 +6,7 @@ COMPOSE := docker compose
 DB_SERVICE := db
 
 .DEFAULT_GOAL := help
-.PHONY: help up build down ps logs wait-db seed demo reset clean backup restore
+.PHONY: help up build down ps logs wait-db seed demo reset clean backup restore mode-offline mode-online
 
 help: ## Affiche cette aide
 	@echo "HealthAI — cibles disponibles :"
@@ -48,6 +48,16 @@ reset: ## REMISE À ZÉRO : arrête + SUPPRIME tous les volumes (données perdue
 
 clean: ## reset + purge des images locales et conteneurs orphelins du projet
 	$(COMPOSE) down -v --rmi local --remove-orphans
+
+mode-offline: ## Bascule en config OFFLINE (analyse photo simulée, aucun appel réseau)
+	@sed -i 's/^VISION_PROVIDER=.*/VISION_PROVIDER=mock/' .env
+	@$(COMPOSE) up -d kcal
+	@echo "✓ Mode offline actif — l'analyse photo ne fait plus aucun appel réseau."
+
+mode-online: ## Restaure la config complète (IA connectée : Claude/HuggingFace)
+	@sed -i 's/^VISION_PROVIDER=.*/VISION_PROVIDER=claude/' .env
+	@$(COMPOSE) up -d kcal
+	@echo "✓ Mode complet actif — analyse photo via IA connectée."
 
 backup: ## Sauvegarde Postgres + Mongo + modèles (scripts/backup.sh)
 	./scripts/backup.sh
